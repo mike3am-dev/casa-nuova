@@ -979,4 +979,39 @@ button.fase-tag:hover { background: var(--velo) }
   /* la pillola dello stato spesa resta leggibile ma non si tocca:
      su iPhone un tocco per sbaglio cambiava "pagata" in "prevista". */
   .pill { pointer-events: none }
+
+  /* ---- Cantiere ---- */
+  .tl-meta { width: 100% }
+
+  /* il punto della situazione sta sotto la timeline e va tenuto stretto:
+     due dati per riga, niente sottotitoli, titolo più piccolo. */
+  .situazione { padding-left: calc(1.1rem - 4px) }
+  .sit-titolo { font-size: 1.1rem; margin: .3rem 0 .7rem; max-width: none }
+  .sit-dati {
+    grid-template-columns: 1fr 1fr; gap: .7rem 1rem;
+    margin-top: 1rem; padding-top: .9rem;
+  }
+  .sit-dati b { font-size: 1.25rem }
+  .sit-dati small { font-size: .6rem; letter-spacing: .06em; margin-top: .15rem }
+  .sit-dati em { display: none }
+  .sit-dati .sit-prossimo em { display: block; font-size: .7rem }
+  .sit-sotto { font-size: .78rem }
+  .sit-prossimo-passo { margin-top: 1rem }
+  .sit-prossimo-passo p { font-size: .86rem }
+
+  /* il sopralluogo: una colonna sola, righe più arieggiate, niente testo accavallato */
+  .fase { grid-template-columns: 1fr; gap: 1.1rem }
+  .card-eyebrow-row { flex-wrap: wrap; gap: .3rem }
+  .card-eyebrow-row .eyebrow { line-height: 1.5 }
+  .meteo-badge { display: block; margin: .15rem 0 0 0 }
+  .ed { padding: .7rem 0 }
+  .ed-top { grid-template-columns: auto 1fr 44px; gap: .5rem }
+  .ed-top b { font-size: 1rem; white-space: nowrap }
+  .ed small { padding-left: 0; margin-top: .35rem; font-size: .82rem; line-height: 1.5 }
+  .report { margin-top: 1.2rem; padding-left: .8rem }
+  .report p { font-size: .9rem; line-height: 1.6 }
+  .blocco-cantiere { margin-top: 1.2rem }
+  .ms-grid { grid-template-columns: 1fr; gap: .6rem }
+  .ms p, .cfr-item p { font-size: .88rem; line-height: 1.55 }
+  .cfr-item { padding-left: .8rem }
 }

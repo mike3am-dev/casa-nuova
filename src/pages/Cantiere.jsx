@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { dataIt, dataBreve, quando, giornoSettimana, giorniAllaConsegna } from '../lib/format'
 import { signedUrls } from '../lib/media'
 import PhotoGrid from '../components/PhotoGrid'
+import Lightbox from '../components/Lightbox'
 
 const ORDINE = ['A', 'B', 'C', 'S', 'T', 'DE']
 const LAB = c => (c === 'DE' ? 'D/E' : c)   // D/E: unica struttura (contiene la Palazzina E)
@@ -19,6 +20,7 @@ export default function Cantiere() {
   const [nuovo, setNuovo] = useState(false)
   const [editPiani, setEditPiani] = useState(false)
   const [editReport, setEditReport] = useState(false)
+  const [grande, setGrande] = useState(null)   // { visitId } foto della timeline aperte a schermo pieno
   const stripRef = useRef(null)
 
   async function carica(mantieniSel = false) {
@@ -119,6 +121,74 @@ export default function Cantiere() {
         <p>La costruzione nel tempo. Scorri la timeline e tocca un sopralluogo per vederne il report.</p>
       </div>
 
+      {/* ---- prima di tutto la timeline: è la cosa che si guarda ogni volta ---- */}
+      <div className="card">
+        <div className="card-eyebrow-row">
+          <span className="eyebrow">Timeline sopralluoghi</span>
+          <button className="btn-mini solo-mac" onClick={() => setNuovo(x => !x)}>{nuovo ? 'Chiudi' : '+ Nuovo sopralluogo'}</button>
+        </div>
+
+        {nuovo && (
+          <form onSubmit={aggiungiVisita} style={{ marginBottom: '1.4rem' }}>
+            <div className="field"><label>Titolo</label>
+              <input name="title" required placeholder="es. Volo drone di agosto" /></div>
+            <div style={{ display: 'flex', gap: '.8rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div className="field"><label>Data</label>
+                <input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} /></div>
+              <div className="field" style={{ width: 190 }}><label>Meteo</label>
+                <select name="meteo" defaultValue="">
+                  <option value="">—</option>
+                  {Object.entries(METEO).map(([v, i]) => <option key={v} value={v}>{i} {v}</option>)}
+                </select>
+              </div>
+              <div className="field" style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+                <input name="drone" type="checkbox" id="drone" style={{ width: 'auto' }} defaultChecked />
+                <label htmlFor="drone" style={{ margin: 0 }}>Volo drone</label>
+              </div>
+            </div>
+            <div className="field"><label>Report di cantiere</label>
+              <textarea name="report" placeholder="Com'era il cantiere quel giorno…" /></div>
+            <button className="btn" type="submit">Aggiungi tappa</button>
+          </form>
+        )}
+
+        {visite.length === 0 && !nuovo && (
+          <p className="vuoto">Nessun sopralluogo ancora. Aggiungi la prima tappa.</p>
+        )}
+
+        {visite.length > 0 && (
+          <>
+            <div className="tl-hint"><span className="frecce">→</span> il più recente è a sinistra · scorri verso destra per tornare indietro nel tempo</div>
+            <div className="tl-wrap">
+              <div className="tl" ref={stripRef}>
+                {[...visite].reverse().map(vv => {
+                  const thumb = cover[foto[vv.id]?.[0]?.thumb_path]
+                  const haFoto = (foto[vv.id] ?? []).length > 0
+                  return (
+                    <div className="tl-item" key={vv.id}>
+                      <div className={`tl-card ${vv.id === sel ? 'on' : ''}`}>
+                        {/* la foto: seleziona la tappa E la apre subito grande */}
+                        <button className="tl-thumb" aria-label={`Foto del ${dataBreve(vv.date)} a schermo pieno`}
+                          onClick={() => { setSel(vv.id); if (haFoto) setGrande(vv.id) }}>
+                          {vv.drone && <span className="tl-drone">drone</span>}
+                          {thumb ? <img src={thumb} alt="" loading="lazy" decoding="async" /> : <span className="t-nofoto">nessuna foto</span>}
+                        </button>
+                        <span className="tl-dot" />
+                        {/* la data: cambia soltanto la tappa mostrata sotto */}
+                        <button className="tl-meta" onClick={() => setSel(vv.id)}
+                          aria-label={`Mostra il report del ${dataBreve(vv.date)}`}>
+                          <b>{dataBreve(vv.date)}</b>
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* ---- punto della situazione: dove siamo, in un colpo d'occhio ---- */}
       {(() => {
         const ultima = visite.at(-1)
@@ -130,7 +200,7 @@ export default function Cantiere() {
           <div className="card situazione">
             <div className="sit-testa">
               <span className="eyebrow">Il mio appartamento · Palazzina E, piano terra</span>
-              {!editPiani && <button className="btn-mini" onClick={() => setEditPiani(true)}>Aggiorna</button>}
+              {!editPiani && <button className="btn-mini solo-mac" onClick={() => setEditPiani(true)}>Aggiorna</button>}
             </div>
 
             {!editPiani ? (
@@ -203,68 +273,6 @@ export default function Cantiere() {
         )
       })()}
 
-      <div className="card">
-        <div className="card-eyebrow-row">
-          <span className="eyebrow">Timeline sopralluoghi</span>
-          <button className="btn-mini solo-mac" onClick={() => setNuovo(x => !x)}>{nuovo ? 'Chiudi' : '+ Nuovo sopralluogo'}</button>
-        </div>
-
-        {nuovo && (
-          <form onSubmit={aggiungiVisita} style={{ marginBottom: '1.4rem' }}>
-            <div className="field"><label>Titolo</label>
-              <input name="title" required placeholder="es. Volo drone di agosto" /></div>
-            <div style={{ display: 'flex', gap: '.8rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <div className="field"><label>Data</label>
-                <input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} /></div>
-              <div className="field" style={{ width: 190 }}><label>Meteo</label>
-                <select name="meteo" defaultValue="">
-                  <option value="">—</option>
-                  {Object.entries(METEO).map(([v, i]) => <option key={v} value={v}>{i} {v}</option>)}
-                </select>
-              </div>
-              <div className="field" style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-                <input name="drone" type="checkbox" id="drone" style={{ width: 'auto' }} defaultChecked />
-                <label htmlFor="drone" style={{ margin: 0 }}>Volo drone</label>
-              </div>
-            </div>
-            <div className="field"><label>Report di cantiere</label>
-              <textarea name="report" placeholder="Com'era il cantiere quel giorno…" /></div>
-            <button className="btn" type="submit">Aggiungi tappa</button>
-          </form>
-        )}
-
-        {visite.length === 0 && !nuovo && (
-          <p className="vuoto">Nessun sopralluogo ancora. Aggiungi la prima tappa.</p>
-        )}
-
-        {visite.length > 0 && (
-          <>
-            <div className="tl-hint"><span className="frecce">→</span> il più recente è a sinistra · scorri verso destra per tornare indietro nel tempo</div>
-            <div className="tl-wrap">
-              <div className="tl" ref={stripRef}>
-                {[...visite].reverse().map(vv => {
-                  const thumb = cover[foto[vv.id]?.[0]?.thumb_path]
-                  return (
-                    <div className="tl-item" key={vv.id}>
-                      <button className={`tl-card ${vv.id === sel ? 'on' : ''}`} onClick={() => setSel(vv.id)}>
-                        <div className="tl-thumb">
-                          {vv.drone && <span className="tl-drone">drone</span>}
-                          {thumb ? <img src={thumb} alt="" loading="lazy" /> : <span className="t-nofoto">nessuna foto</span>}
-                        </div>
-                        <span className="tl-dot" />
-                        <div className="tl-meta">
-                          <b>{dataBreve(vv.date)}</b>
-                        </div>
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
       {v && (
         <div className="card">
           <div className="card-eyebrow-row">
@@ -272,7 +280,7 @@ export default function Cantiere() {
               {dataIt(v.date)} · {v.title}
               {v.meta?.weather && <span className="meteo-badge">{METEO[v.meta.weather]} {v.meta.weather}</span>}
             </span>
-            <span style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
+            <span className="solo-mac" style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
               <select className="meteo-sel" value={v.meta?.weather || ''} onChange={e => salvaMeteo(v.id, e.target.value)} aria-label="Meteo del sopralluogo">
                 <option value="">meteo…</option>
                 {Object.entries(METEO).map(([w, i]) => <option key={w} value={w}>{i} {w}</option>)}
@@ -365,6 +373,10 @@ export default function Cantiere() {
             </form>
           )}
         </div>
+      )}
+
+      {grande && (foto[grande] ?? []).length > 0 && (
+        <Lightbox photos={foto[grande]} index={0} onClose={() => setGrande(null)} />
       )}
     </section>
   )

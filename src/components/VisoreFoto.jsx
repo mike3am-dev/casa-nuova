@@ -13,7 +13,7 @@ import { euro } from '../lib/format'
  * onChiudi  callback
  * onModifica callback(itemAggiornato) per aggiornare la lista che sta sotto
  */
-export default function VisoreFoto({ item, elenco, onChiudi, onModifica }) {
+export default function VisoreFoto({ item, elenco, onChiudi, onModifica, soloFoto }) {
   const lista = elenco?.length ? elenco : (item ? [item] : [])
   const [i, setI] = useState(() => Math.max(0, lista.findIndex(x => x.id === item?.id)))
   const [url, setUrl] = useState(null)
@@ -66,12 +66,19 @@ export default function VisoreFoto({ item, elenco, onChiudi, onModifica }) {
         <button className="freccia dx" onClick={() => setI(v => (v + 1) % lista.length)} aria-label="Successiva">›</button>
       </>}
 
-      <div className="vis-corpo" onClick={e => e.stopPropagation()}>
+      <div className={`vis-corpo ${soloFoto ? 'solo-foto' : ''}`} onClick={e => e.stopPropagation()}>
         <div className="vis-img">
           {url ? <img src={url} alt={corrente.title} />
                : <div className="caricamento" style={{ color: '#D8C7AC' }}>carico…</div>}
         </div>
 
+        {/* i render del complesso sono immagini generali: niente scelta ambienti, si guardano e basta */}
+        {soloFoto ? (
+          <div className="vis-didascalia">
+            <b>{corrente.title}</b>
+            {lista.length > 1 && <span>{i + 1} di {lista.length}</span>}
+          </div>
+        ) : (
         <aside className="vis-pannello">
           <div className="vis-testa">
             <b>{corrente.title}</b>
@@ -98,6 +105,7 @@ export default function VisoreFoto({ item, elenco, onChiudi, onModifica }) {
           )}
           {lista.length > 1 && <p className="vis-conta">{i + 1} di {lista.length}</p>}
         </aside>
+        )}
       </div>
     </div>
   )

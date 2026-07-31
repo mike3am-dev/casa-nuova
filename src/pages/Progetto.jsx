@@ -49,7 +49,7 @@ export default function Progetto() {
       )}
 
       {aperta && (
-        <VisoreFoto item={aperta} elenco={render}
+        <VisoreFoto item={aperta} elenco={render} soloFoto
           onChiudi={() => setAperta(null)} onModifica={aggiorna} />
       )}
     </section>

@@ -427,7 +427,47 @@ main { flex: 1; min-width: 0; padding: 2.4rem clamp(1.2rem, 4vw, 3.5rem) 5rem; m
 .voce.done .check { background: var(--oliva); border-color: var(--oliva) }
 .voce.done .check svg { opacity: 1; transform: scale(1) }
 .voce.done p { color: var(--inchiostro-2); text-decoration: line-through; text-decoration-color: var(--travertino-scuro) }
-.legenda { display: flex; gap: 1.1rem; flex-wrap: wrap; margin-top: 1.1rem; font-size: .78rem; color: var(--inchiostro-2) }
+/* ---------- riga con swipe, stile Promemoria ---------- */
+.voce-swipe { position: relative; overflow: hidden }
+.voce-swipe .voce { position: relative; z-index: 1; background: var(--calce) }
+.voce-sotto {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 1rem; border-radius: 8px;
+  font-size: .8rem; font-weight: 600; letter-spacing: .04em; color: #F5EFE2;
+}
+.voce-sotto .sw-fatta { }
+.voce-sotto .sw-elimina { margin-left: auto }
+.voce-sotto.a-destra { background: var(--oliva) }
+.voce-sotto.a-destra .sw-elimina { visibility: hidden }
+.voce-sotto.a-sinistra { background: #B4553F }
+.voce-sotto.a-sinistra .sw-fatta { visibility: hidden }
+
+/* matita: apre i dettagli (scadenza, nota, categoria) */
+.voce-matita {
+  flex: none; width: 30px; height: 30px; display: grid; place-items: center;
+  color: var(--bronzo); border-radius: 8px; opacity: .55; transition: opacity .15s, background .15s;
+}
+.voce-matita:hover { opacity: 1; background: var(--velo) }
+@media (hover: none) { .voce-matita { opacity: .7 } }
+
+/* ---------- scheda dei dettagli ---------- */
+.scheda-fondo {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-items: end center;
+  background: rgba(24,16,10,.55); padding: 0;
+}
+.scheda {
+  width: 100%; max-width: 520px; background: var(--calce);
+  border-radius: 18px 18px 0 0; padding: 1.3rem 1.2rem calc(1.3rem + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: .8rem; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 -18px 50px rgba(24,16,10,.35);
+}
+.scheda-testa { display: flex; align-items: center; justify-content: space-between }
+.scheda .fld { display: flex; flex-direction: column; gap: .3rem }
+.scheda .fld span { font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--bronzo) }
+.scheda-azioni { display: flex; gap: .7rem; margin-top: .4rem }
+.scheda-azioni .btn { flex: 1 }
+.btn.quiet.rosso { color: #B4553F; border-color: #B4553F }
+@media (min-width: 761px) { .scheda-fondo { place-items: center } .scheda { border-radius: 18px } }
 
 /* ---------- checklist: i quattro sguardi sull'ambiente ---------- */
 .quadranti { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem 1.6rem }
@@ -820,6 +860,31 @@ button.fase-tag:hover { background: var(--velo) }
 }
 @media (max-width: 860px) { .vis-img img { max-height: 45vh } }
 
+/* il visore non aveva uno stile per chiudi/frecce: testo scuro su fondo scuro */
+.visore .chiudi {
+  position: fixed; top: max(1.2rem, env(safe-area-inset-top)); right: 1.2rem; z-index: 61;
+  color: #EFE3CE; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; padding: .6rem;
+}
+.visore .freccia {
+  position: fixed; top: 50%; transform: translateY(-50%); z-index: 61;
+  color: #EFE3CE; font-size: 2.4rem; line-height: 1; padding: .6rem 1rem; opacity: .8;
+}
+.visore .freccia.sx { left: .2rem } .visore .freccia.dx { right: .2rem }
+
+/* visore "solo foto": l'immagine si prende tutto lo spazio, sotto un rigo di titolo */
+.vis-corpo.solo-foto {
+  grid-template-columns: 1fr; grid-template-rows: minmax(0,1fr) auto;
+  gap: .8rem; align-content: center;
+}
+.vis-corpo.solo-foto .vis-img img { max-height: 82vh }
+@media (max-width: 860px) { .vis-corpo.solo-foto .vis-img img { max-height: 74vh } }
+.vis-didascalia {
+  display: flex; align-items: baseline; justify-content: center; gap: .7rem;
+  color: #EFE3CE; font-size: .9rem; text-align: center; padding: 0 1rem;
+}
+.vis-didascalia b { font-family: 'Fraunces', Georgia, serif; font-weight: 420 }
+.vis-didascalia span { color: #C9B79B; font-size: .8rem }
+
 .vis-pannello {
   background: var(--calce); border-radius: 16px; padding: 1.3rem 1.4rem;
   overflow-y: auto; box-shadow: var(--ombra); align-self: start; max-height: 88vh;
@@ -910,4 +975,8 @@ button.fase-tag:hover { background: var(--velo) }
 
   /* niente modifiche accidentali da telefono: si fanno dal Mac */
   .solo-mac { display: none !important }
+
+  /* la pillola dello stato spesa resta leggibile ma non si tocca:
+     su iPhone un tocco per sbaglio cambiava "pagata" in "prevista". */
+  .pill { pointer-events: none }
 }

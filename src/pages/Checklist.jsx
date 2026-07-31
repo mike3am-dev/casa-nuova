@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { CODICI, ORDINE_CODICI } from '../lib/format'
 import { FASI, ORDINE_FASI } from '../lib/fasi'
@@ -14,6 +14,134 @@ const PLACEHOLDER = {
   tecnico: 'predisposizione o misura…',
 }
 
+const SOGLIA = 72   // quanto trascinare perché lo swipe conti
+
+/**
+ * Una riga della checklist, come in Promemoria:
+ * swipe a destra = fatta / da fare, swipe a sinistra = elimina,
+ * matita = apre i dettagli. Niente emoji, niente icone di stato a destra.
+ */
+function VoceRiga({ v, thumbs, onToggle, onElimina, onFoto, onDettagli, sotto }) {
+  const [dx, setDx] = useState(0)
+  const [trascino, setTrascino] = useState(false)
+  const p = useRef(null)
+
+  function inizio(e) {
+    const t = e.touches[0]
+    p.current = { x: t.clientX, y: t.clientY, deciso: null }
+  }
+  function muovi(e) {
+    if (!p.current) return
+    const t = e.touches[0]
+    const ddx = t.clientX - p.current.x
+    const ddy = t.clientY - p.current.y
+    // decido una volta sola se è uno swipe orizzontale o uno scorrimento verticale
+    if (p.current.deciso === null) {
+      if (Math.abs(ddx) < 8 && Math.abs(ddy) < 8) return
+      p.current.deciso = Math.abs(ddx) > Math.abs(ddy)
+      if (p.current.deciso) setTrascino(true)
+    }
+    if (!p.current.deciso) return
+    setDx(Math.max(-140, Math.min(140, ddx)))
+  }
+  function fine() {
+    const d = dx
+    const era = p.current?.deciso
+    p.current = null
+    setTrascino(false); setDx(0)
+    if (!era) return
+    if (d > SOGLIA) onToggle(v)
+    else if (d < -SOGLIA) onElimina(v)
+  }
+
+  const versoDestra = dx > 0
+  return (
+    <div className="voce-swipe">
+      <div className={`voce-sotto ${versoDestra ? 'a-destra' : 'a-sinistra'}`} aria-hidden="true">
+        <span className="sw-fatta">{v.done ? 'Da fare' : 'Fatta'}</span>
+        <span className="sw-elimina">Elimina</span>
+      </div>
+
+      <div className={`voce ${v.done ? 'done' : ''}`}
+        style={{ transform: `translateX(${dx}px)`, transition: trascino ? 'none' : 'transform .2s ease' }}
+        onTouchStart={inizio} onTouchMove={muovi} onTouchEnd={fine} onTouchCancel={fine}>
+
+        <button className="check" onClick={() => onToggle(v)}
+          aria-label={v.done ? 'Segna da fare' : 'Segna fatta'}>
+          <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6.5l2.5 2.5L10 3" /></svg>
+        </button>
+
+        <div className="vtx">
+          <p className="riga-testo" onClick={() => onDettagli(v)}>{v.text}</p>
+          {sotto}
+        </div>
+
+        {v.meta?.foto_thumb && thumbs[v.meta.foto_thumb] && (
+          <button className="voce-foto" onClick={() => onFoto(v)} aria-label="Apri foto di riferimento">
+            <img src={thumbs[v.meta.foto_thumb]} alt="" loading="lazy" decoding="async" />
+          </button>
+        )}
+
+        <button className="voce-matita" onClick={() => onDettagli(v)} aria-label={`Dettagli di ${v.text}`}>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11.5 2.5l2 2L6 12l-2.7.7L4 10z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Scheda dei dettagli: qui dentro stanno testo, nota, scadenza e categoria. */
+function SchedaDettagli({ v, onChiudi, onSalva, onElimina }) {
+  const [testo, setTesto] = useState(v.text)
+  const [nota, setNota] = useState(v.note || '')
+  const [fase, setFase] = useState(v.meta?.fase || '')
+  const [code, setCode] = useState(v.code)
+
+  function salva(e) {
+    e.preventDefault()
+    const pulito = testo.trim()
+    if (!pulito) return
+    onSalva(v, { text: pulito, note: nota.trim(), code, meta: { ...(v.meta || {}), fase } })
+  }
+
+  return (
+    <div className="scheda-fondo" role="dialog" aria-modal="true" aria-label="Dettagli della voce"
+      onClick={e => { if (e.target === e.currentTarget) onChiudi() }}>
+      <form className="scheda" onSubmit={salva}>
+        <div className="scheda-testa">
+          <span className="eyebrow">Dettagli</span>
+          <button type="button" className="btn-mini" onClick={onChiudi}>Chiudi</button>
+        </div>
+
+        <label className="fld fld-full"><span>Voce</span>
+          <input value={testo} onChange={e => setTesto(e.target.value)} autoFocus required /></label>
+
+        <label className="fld fld-full"><span>Nota</span>
+          <input value={nota} onChange={e => setNota(e.target.value)} placeholder="dettagli, misure…" /></label>
+
+        <label className="fld fld-full"><span>Entro quando</span>
+          <select value={fase} onChange={e => setFase(e.target.value)}>
+            <option value="">— non urgente</option>
+            {ORDINE_FASI.map(f => <option key={f} value={f}>{FASI[f].label}</option>)}
+          </select></label>
+
+        <label className="fld fld-full"><span>Categoria</span>
+          <select value={code} onChange={e => setCode(e.target.value)}>
+            {ORDINE_CODICI.map(k => <option key={k} value={k}>{CODICI[k].titolo}</option>)}
+          </select></label>
+
+        <div className="scheda-azioni">
+          <button className="btn" type="submit">Salva</button>
+          <button className="btn quiet rosso" type="button" onClick={() => onElimina(v)}>Elimina</button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
 export default function Checklist() {
   const [stanze, setStanze] = useState(null)
   const [attiva, setAttiva] = useState(null)      // room_id, oppure 'urgenze'
@@ -23,7 +151,7 @@ export default function Checklist() {
   const [thumbs, setThumbs] = useState({})
   const [form, setForm] = useState(false)
   const [grande, setGrande] = useState(null)
-  const [edit, setEdit] = useState(null)   // { id, campo: 'text' | 'note' }
+  const [dettagli, setDettagli] = useState(null)   // voce aperta nella scheda dettagli
 
   useEffect(() => {
     supabase.from('rooms').select('*').order('sort').then(({ data }) => {
@@ -87,37 +215,18 @@ export default function Checklist() {
     caricaVoci()
   }
 
-  // modifica diretta del testo o della nota, stile Promemoria
-  async function salvaCampo(v, campo, valore) {
-    const nuovo = valore.trim()
-    setEdit(null)
-    if (nuovo === (v[campo] ?? '')) return
-    if (campo === 'text' && !nuovo) return          // il testo non può restare vuoto
-    setVoci(vs => vs.map(x => x.id === v.id ? { ...x, [campo]: nuovo } : x))
-    setTutte(vs => vs.map(x => x.id === v.id ? { ...x, [campo]: nuovo } : x))
-    await supabase.from('checklist_items').update({ [campo]: nuovo }).eq('id', v.id)
-  }
-
-  // cambia la scadenza di cantiere ciclando tra le fasi
-  async function cicloFase(v) {
-    const cur = v.meta?.fase || ''
-    const giro = ['', ...ORDINE_FASI]
-    const next = giro[(giro.indexOf(cur) + 1) % giro.length]
-    const meta = { ...(v.meta || {}), fase: next }
-    setVoci(vs => vs.map(x => x.id === v.id ? { ...x, meta } : x))
-    setTutte(vs => vs.map(x => x.id === v.id ? { ...x, meta } : x))
-    await supabase.from('checklist_items').update({ meta }).eq('id', v.id)
-  }
-
-  // sposta la voce in un altro riquadro (es. da desiderio a dubbio)
-  async function cambiaCodice(v, code) {
-    setVoci(vs => vs.map(x => x.id === v.id ? { ...x, code } : x))
-    setTutte(vs => vs.map(x => x.id === v.id ? { ...x, code } : x))
-    await supabase.from('checklist_items').update({ code }).eq('id', v.id)
+  // salvataggio dalla scheda dei dettagli: testo, nota, scadenza e categoria in un colpo solo
+  async function salvaDettagli(v, campi) {
+    setDettagli(null)
+    setVoci(vs => vs.map(x => x.id === v.id ? { ...x, ...campi } : x))
+    setTutte(vs => vs.map(x => x.id === v.id ? { ...x, ...campi } : x))
+    const { error } = await supabase.from('checklist_items').update(campi).eq('id', v.id)
+    if (error) { alert('Non salvato: ' + error.message); caricaVoci() }
   }
 
   async function elimina(v) {
     if (!confirm(`Eliminare questa voce?\n\n“${v.text}”\n\nL'operazione non si può annullare.`)) return
+    setDettagli(null)
     await supabase.from('checklist_items').delete().eq('id', v.id)
     caricaVoci()
   }
@@ -170,7 +279,7 @@ export default function Checklist() {
         <button className={attiva === 'urgenze' ? 'on' : ''} onClick={() => setAttiva('urgenze')}>⏱ Per scadenza</button>
         {stanze.map(s => (
           <button key={s.id} className={s.id === attiva ? 'on' : ''}
-            onClick={() => { setAttiva(s.id); setForm(false); setEdit(null) }}>{s.name}</button>
+            onClick={() => { setAttiva(s.id); setForm(false); setDettagli(null) }}>{s.name}</button>
         ))}
       </div>
 
@@ -187,39 +296,15 @@ export default function Checklist() {
                 <small>{FASI[f].spiega}</small>
               </div>
               {perFase[f].map(v => (
-                <div className="voce" key={v.id}>
-                  <button className="check" onClick={() => toggle(v)} aria-label="Segna fatta">
-                    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6.5l2.5 2.5L10 3" /></svg>
-                  </button>
-                  <span className="cod">{CODICI[v.code]?.emoji ?? '•'}</span>
-                  <div className="vtx">
-                    {edit?.id === v.id && edit.campo === 'text' ? (
-                      <input className="riga-edit" autoFocus defaultValue={v.text}
-                        onBlur={e => salvaCampo(v, 'text', e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') e.target.blur()
-                          if (e.key === 'Escape') { e.target.value = v.text; setEdit(null) }
-                        }} />
-                    ) : (
-                      <p className="riga-testo" onClick={() => setEdit({ id: v.id, campo: 'text' })}
-                        title="Tocca per modificare">{v.text}</p>
-                    )}
+                <VoceRiga key={v.id} v={v} thumbs={thumbs}
+                  onToggle={toggle} onElimina={elimina} onFoto={apriFoto} onDettagli={setDettagli}
+                  sotto={
                     <small className="riga-sotto">
                       <button className="fase-tag stanza-tag" onClick={() => setAttiva(v.room_id)}
                         title="Vai alla scheda dell'ambiente">{nomeStanza(v.room_id)}</button>
                       {v.note}
                     </small>
-                  </div>
-                  {v.meta?.foto_thumb && thumbs[v.meta.foto_thumb] && (
-                    <button className="voce-foto" onClick={() => apriFoto(v)} aria-label="Apri foto">
-                      <img src={thumbs[v.meta.foto_thumb]} alt="" loading="lazy" />
-                    </button>
-                  )}
-                  <div className="voce-azioni">
-                    <button className="btn-mini" onClick={() => cicloFase(v)} title="Cambia scadenza">⏱</button>
-                    <button className="btn-mini rosso" onClick={() => elimina(v)} aria-label="Elimina voce">✕</button>
-                  </div>
-                </div>
+                  } />
               ))}
             </div>
           ))}
@@ -254,57 +339,14 @@ export default function Checklist() {
                     </div>
                   </div>
                   {gruppo.map(v => (
-                    <div key={v.id} className={`voce ${v.done ? 'done' : ''}`}>
-                      <button className="check" onClick={() => toggle(v)} aria-label={v.done ? 'Segna da fare' : 'Segna fatta'}>
-                        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6.5l2.5 2.5L10 3" /></svg>
-                      </button>
-                      <div className="vtx">
-                        {edit?.id === v.id && edit.campo === 'text' ? (
-                          <input className="riga-edit" autoFocus defaultValue={v.text}
-                            onBlur={e => salvaCampo(v, 'text', e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') e.target.blur()
-                              if (e.key === 'Escape') { e.target.value = v.text; setEdit(null) }
-                            }} />
-                        ) : (
-                          <p className="riga-testo" onClick={() => setEdit({ id: v.id, campo: 'text' })}
-                            title="Tocca per modificare">{v.text}</p>
-                        )}
-
+                    <VoceRiga key={v.id} v={v} thumbs={thumbs}
+                      onToggle={toggle} onElimina={elimina} onFoto={apriFoto} onDettagli={setDettagli}
+                      sotto={(v.meta?.fase || v.note) && (
                         <small className="riga-sotto">
-                          <button className={`fase-tag ${v.meta?.fase || 'vuota'}`} onClick={() => cicloFase(v)}
-                            title="Tocca per cambiare la scadenza">
-                            {v.meta?.fase ? FASI[v.meta.fase].label : '+ scadenza'}
-                          </button>
-                          {edit?.id === v.id && edit.campo === 'note' ? (
-                            <input className="riga-edit nota" autoFocus defaultValue={v.note}
-                              placeholder="dettagli, misure…"
-                              onBlur={e => salvaCampo(v, 'note', e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') e.target.blur()
-                                if (e.key === 'Escape') { e.target.value = v.note; setEdit(null) }
-                              }} />
-                          ) : (
-                            <span className={`riga-nota ${v.note ? '' : 'vuota'}`}
-                              onClick={() => setEdit({ id: v.id, campo: 'note' })}>
-                              {v.note || '+ nota'}
-                            </span>
-                          )}
+                          {v.meta?.fase && <span className={`fase-tag ${v.meta.fase}`}>{FASI[v.meta.fase].label}</span>}
+                          {v.note && <span className="riga-nota">{v.note}</span>}
                         </small>
-                      </div>
-                      {v.meta?.foto_thumb && thumbs[v.meta.foto_thumb] && (
-                        <button className="voce-foto" onClick={() => apriFoto(v)} aria-label="Apri foto di riferimento">
-                          <img src={thumbs[v.meta.foto_thumb]} alt="" loading="lazy" />
-                        </button>
-                      )}
-                      <div className="voce-azioni">
-                        <select className="voce-sposta" value={v.code} title="Sposta in un altro riquadro"
-                          onChange={e => cambiaCodice(v, e.target.value)}>
-                          {ORDINE_CODICI.map(k => <option key={k} value={k}>{CODICI[k].emoji}</option>)}
-                        </select>
-                        <button className="btn-mini rosso" onClick={() => elimina(v)} aria-label="Elimina voce">✕</button>
-                      </div>
-                    </div>
+                      )} />
                   ))}
 
                   <form className="q-aggiungi" onSubmit={e => aggiungiRapida(e, code)}>
@@ -365,10 +407,12 @@ export default function Checklist() {
             </form>
           )}
 
-          <div className="legenda">
-            {Object.values(CODICI).map(c => <span key={c.label}>{c.emoji} {c.label}</span>)}
-          </div>
         </div>
+      )}
+
+      {dettagli && (
+        <SchedaDettagli v={dettagli} onChiudi={() => setDettagli(null)}
+          onSalva={salvaDettagli} onElimina={elimina} />
       )}
 
       {grande && (

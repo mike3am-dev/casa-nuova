@@ -1,0 +1,73 @@
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { margin:0; background:#EBE1CE; font-family:-apple-system,sans-serif; color:#33261A }
+  body.grain::before {
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    mix-blend-mode:multiply;
+  }
+  .riga { padding:14px 20px; margin:10px 14px; background:#F7F1E4; border-radius:14px;
+          box-shadow:0 10px 24px -14px rgba(51,38,26,.45) }
+  nav { position:fixed; bottom:0; left:0; right:0; height:64px; z-index:5;
+        background:color-mix(in srgb,#F7F1E4 92%,transparent); border-top:1px solid #DCCDB4 }
+  nav.blur { backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px) }
+  #esito { position:fixed; top:0; left:0; right:0; background:#33261A; color:#F7F1E4;
+           font:12px/1.5 monospace; padding:8px; z-index:10; white-space:pre-wrap }
+</style>
+<div id="esito">pronto</div>
+<div id="lista"></div>
+<nav></nav>
+<script>
+document.getElementById('lista').innerHTML =
+  Array.from({length:120},(_,i)=>`<div class="riga"><b>Voce numero ${i}</b><br><small>dettaglio della riga di prova ${i} · con un po' di testo</small></div>`).join('')
+
+function misura() {
+  return new Promise(res => {
+    let frames = 0, y = 0, t0 = performance.now(), peggiore = 0, prec = t0
+    function step(now) {
+      const dt = now - prec; prec = now
+      if (frames > 2 && dt > peggiore) peggiore = dt
+      frames++; y += 40; scrollTo(0, y)
+      if (now - t0 < 2500) requestAnimationFrame(step)
+      else res({ fps: +(frames / ((now - t0) / 1000)).toFixed(1), framePeggiore: Math.round(peggiore) })
+    }
+    requestAnimationFrame(step)
+  })
+}
+
+async function prova(nome, grain, blur) {
+  document.body.classList.toggle('grain', grain)
+  document.querySelector('nav').classList.toggle('blur', blur)
+  scrollTo(0, 0)
+  await new Promise(r => setTimeout(r, 600))
+  const r = await misura()
+  return `${nome.padEnd(22)} ${String(r.fps).padStart(5)} fps   frame peggiore ${r.framePeggiore}ms`
+}
+
+function provaIntl() {
+  const N = 200, O = { style:'currency', currency:'EUR', maximumFractionDigits:0 }
+  let t = performance.now()
+  for (let i=0;i<N;i++) new Intl.NumberFormat('it-IT', O).format(i)
+  const nuovo = performance.now() - t
+  const f = new Intl.NumberFormat('it-IT', O)
+  t = performance.now()
+  for (let i=0;i<N;i++) f.format(i)
+  const riuso = performance.now() - t
+  return `Intl x${N}: nuovo ogni volta ${nuovo.toFixed(1)}ms · riusato ${riuso.toFixed(1)}ms · ${(nuovo/Math.max(riuso,.01)).toFixed(0)}x`
+}
+
+;(async () => {
+  const e = document.getElementById('esito')
+  const righe = [provaIntl(), '']
+  for (const [n, g, b] of [
+    ['grana + blur (oggi)', true, true],
+    ['solo grana',          true, false],
+    ['solo blur',           false, true],
+    ['niente (pulito)',     false, false],
+    ['grana + blur (bis)',  true, true],
+    ['niente (bis)',        false, false],
+  ]) { righe.push(await prova(n, g, b)); e.textContent = righe.join('\n') }
+  e.textContent = righe.join('\n') + '\nFINITO'
+  window.__risultato = righe.join('\n')
+})()
+</script>

@@ -40,7 +40,7 @@ export default function Progetto() {
           {render.map(r => (
             <button className="tile" key={r.id} onClick={() => setAperta(r)} aria-label={r.title}>
               {thumbs[r.thumb_path]
-                ? <img src={thumbs[r.thumb_path]} alt={r.title} loading="lazy" />
+                ? <img src={thumbs[r.thumb_path]} alt={r.title} loading="lazy" decoding="async" />
                 : <span className="tile-ph" />}
               <span className="tile-cap">{r.title}</span>
             </button>

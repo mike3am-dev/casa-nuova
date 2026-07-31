@@ -46,12 +46,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
+/* Velo di grana. NIENTE mix-blend-mode: un livello fisso a tutto schermo che si
+   fonde con la pagina obbliga WebKit a ricomporre l'intero documento a ogni
+   frame — su iPhone è la differenza fra scorrere e arrancare. A opacità così
+   bassa il multiply e l'alpha semplice sono indistinguibili a occhio. */
 body::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
+  opacity: .55;
 }
-@media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; opacity: .5 } }
+@media (prefers-color-scheme: dark) { body::before { opacity: .3 } }
 
 h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 420; letter-spacing: .005em; text-wrap: balance; margin: 0 }
 .eyebrow { font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--bronzo) }
@@ -878,7 +882,10 @@ button.fase-tag:hover { background: var(--velo) }
     flex-direction: row; align-items: center;
     padding: .45rem .5rem calc(.45rem + env(safe-area-inset-bottom));
     border-right: none; border-top: 1px solid var(--travertino);
-    background: color-mix(in srgb, var(--calce) 92%, transparent); backdrop-filter: blur(14px);
+    /* fondo pieno, niente backdrop-filter: la sfocatura su una barra fissa
+       costringe iOS a rasterizzare di nuovo tutta la striscia a ogni frame,
+       e a 92% di opacità non si vedeva comunque nulla dietro. */
+    background: var(--calce);
     z-index: 40;
   }
   .wordmark, .side-foot { display: none }

@@ -44,9 +44,13 @@ export function meseAnno(iso) {
   return { mese: MESI[d.getMonth()], anno: d.getFullYear(), key: `${d.getFullYear()}-${d.getMonth()}` }
 }
 
+// Un solo formattatore per tutta l'app: costruire un Intl.NumberFormat costa
+// molto su iPhone (JavaScriptCore), e "Spese" ne chiedeva uno nuovo a ogni importo.
+const FMT_EURO = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+
 export function euro(n) {
   if (n == null || n === '') return ''
-  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
+  return FMT_EURO.format(n)
 }
 
 // Giorni di calendario che separano oggi dalla consegna.

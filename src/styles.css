@@ -890,3 +890,17 @@ button.fase-tag:hover { background: var(--velo) }
   .card { padding: 1.2rem 1.1rem }
   .galleria { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)) }
 }
+
+
+/* ============ BLOCCO IPHONE ============ */
+@media (max-width: 760px) {
+  /* barra in basso: icone più grandi, niente testo a capo, scorrimento orizzontale */
+  nav.side ul { justify-content: flex-start; overflow-x: auto; gap: .1rem; scrollbar-width: none; padding: 0 .2rem }
+  nav.side ul::-webkit-scrollbar { display: none }
+  nav.side li { flex: none }
+  nav.side li a { min-width: 62px; padding: .4rem .3rem; font-size: .6rem; white-space: nowrap; gap: .25rem }
+  nav.side li a svg { width: 22px; height: 22px }
+
+  /* niente modifiche accidentali da telefono: si fanno dal Mac */
+  .solo-mac { display: none !important }
+}

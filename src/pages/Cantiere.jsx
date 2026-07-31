@@ -206,7 +206,7 @@ export default function Cantiere() {
       <div className="card">
         <div className="card-eyebrow-row">
           <span className="eyebrow">Timeline sopralluoghi</span>
-          <button className="btn-mini" onClick={() => setNuovo(x => !x)}>{nuovo ? 'Chiudi' : '+ Nuovo sopralluogo'}</button>
+          <button className="btn-mini solo-mac" onClick={() => setNuovo(x => !x)}>{nuovo ? 'Chiudi' : '+ Nuovo sopralluogo'}</button>
         </div>
 
         {nuovo && (
@@ -277,8 +277,8 @@ export default function Cantiere() {
                 <option value="">meteo…</option>
                 {Object.entries(METEO).map(([w, i]) => <option key={w} value={w}>{i} {w}</option>)}
               </select>
-              <button className="btn-mini" onClick={() => setEditReport(x => !x)}>{editReport ? 'Chiudi' : 'Modifica report'}</button>
-              <button className="btn-mini rosso" onClick={() => eliminaVisita(v)}>elimina tappa</button>
+              <button className="btn-mini solo-mac" onClick={() => setEditReport(x => !x)}>{editReport ? 'Chiudi' : 'Modifica report'}</button>
+              <button className="btn-mini rosso solo-mac" onClick={() => eliminaVisita(v)}>elimina tappa</button>
             </span>
           </div>
 

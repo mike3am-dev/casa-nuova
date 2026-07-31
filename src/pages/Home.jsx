@@ -31,9 +31,9 @@ export default function Home() {
       const domande = voci.filter(x => !x.done && x.code === 'domanda').length
 
       if (ultima) {
-        const { data: ph } = await supabase.from('photos').select('thumb_path')
+        const { data: ph } = await supabase.from('photos').select('image_path')
           .eq('visit_id', ultima.id).limit(1)
-        if (ph?.[0]) signedUrls([ph[0].thumb_path]).then(u => setCover(u[ph[0].thumb_path]))
+        if (ph?.[0]) signedUrls([ph[0].image_path]).then(u => setCover(u[ph[0].image_path]))
       }
       setD({ s: s.data, ultima, statoDE, versato, totale, prossimaSpesa, urgenti, domande })
     })()
@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <section className="screen home">
       <div className="home-hero">
-        <img src="/logo.png" alt="" className="home-logo" />
+        <img src="./logo.png" alt="" className="home-logo" />
         <h1>La casa nuova</h1>
         <p className="home-claim">Palazzina E · piano terra sud-est, con giardino<br />Cologno Monzese</p>
         <div className="home-countdown">

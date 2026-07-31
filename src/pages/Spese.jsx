@@ -110,7 +110,7 @@ export default function Spese() {
       <div className="card">
         <div className="card-eyebrow-row">
           <span className="eyebrow">Piano pagamenti</span>
-          <button className="btn-mini" onClick={() => setFormSpesa(v => !v)}>{formSpesa ? 'Chiudi' : '+ Voce'}</button>
+          <button className="btn-mini solo-mac" onClick={() => setFormSpesa(v => !v)}>{formSpesa ? 'Chiudi' : '+ Voce'}</button>
         </div>
 
         {spese.length > 0 && (
@@ -193,7 +193,7 @@ export default function Spese() {
                   <li className={`pag ${s.status === 'pagata' ? 'pagata' : 'futura'}`} key={s.id}>
                     <div className="pag-data">
                       {s.date ? dataIt(s.date) : 'al rogito'}
-                      <button className="pag-del" onClick={() => eliminaSpesa(s)} aria-label={`Elimina ${s.label}`}>✕</button>
+                      <button className="pag-del solo-mac" onClick={() => eliminaSpesa(s)} aria-label={`Elimina ${s.label}`}>✕</button>
                     </div>
                     <div className="pag-corpo">
                       <div className="pag-testa">
@@ -253,7 +253,7 @@ export default function Spese() {
       <div className="card">
         <div className="card-eyebrow-row">
           <span className="eyebrow">Documenti · fatture · garanzie</span>
-          <button className="btn-mini" onClick={() => setFormDoc(v => !v)}>{formDoc ? 'Chiudi' : '+ Documento'}</button>
+          <button className="btn-mini solo-mac" onClick={() => setFormDoc(v => !v)}>{formDoc ? 'Chiudi' : '+ Documento'}</button>
         </div>
 
         {formDoc && (
@@ -290,7 +290,7 @@ export default function Spese() {
             </span>
             <span className="fine">
               {d.storage_path && <button className="btn-mini" onClick={() => apriDoc(d)}>Apri</button>}
-              <button className="btn-mini rosso" onClick={() => eliminaDoc(d)} aria-label="Elimina">✕</button>
+              <button className="btn-mini rosso solo-mac" onClick={() => eliminaDoc(d)} aria-label="Elimina">✕</button>
             </span>
           </div>
         ))}

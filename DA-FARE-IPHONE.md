@@ -30,12 +30,27 @@
 ## Va bene così
 - Casa & Design su iPhone è chiaro e comprensibile.
 
-## Logo rotto nella schermata iniziale
-- [x] `logo.png` e `favicon.png` erano **fuori dal precache** del service worker
-      (c'erano 10 voci su 12). Il file era sano e online rispondeva 200: mancava
-      solo in cache, quindi senza rete o con rete incerta restava il riquadro
-      rotto. Ora sono precaricati entrambi.
-- Se ricapita **con rete buona**, non è questo: dimmelo e lo guardo daccapo.
+## Logo rotto nella schermata iniziale — risolto
+
+**Causa vera:** `BrowserRouter` era montato **senza `basename`**, ma il sito sta
+in `/casa-nuova/`. Quel percorso non combaciava con nessuna rotta, scattava il
+`path="*"` con `<Navigate to="/">` e l'app **usciva dalla propria cartella**:
+l'indirizzo diventava la radice del dominio. Da lì `./logo.png` andava a cercarsi
+`github.io/logo.png`, che non esiste → riquadro rotto. Ed è la stessa ragione per
+cui ricaricando compariva il 404 di GitHub: non era un segnalibro sbagliato.
+
+Dimostrato servendo la build sotto `/casa-nuova/` in locale: prima l'indirizzo
+saltava a `/` e il logo era 0×0, dopo resta in cartella e il logo carica 503×512.
+
+Correzioni:
+- `base: '/casa-nuova/'` (assoluto) e `basename={import.meta.env.BASE_URL}` nel router.
+- Logo e favicon con percorso assoluto, non più relativo all'indirizzo corrente.
+- `pubblica.sh` genera `404.html` = `index.html`, così ricaricare `/spese` riprende
+  dall'app invece che dalla pagina d'errore di GitHub.
+
+**Falso allarme precedente:** avevo attribuito il problema al precache del service
+worker. Sbagliato — il file era sano e rispondeva 200. Le due voci aggiunte al
+precache restano comunque utili offline, ma non erano la causa.
 
 ---
 

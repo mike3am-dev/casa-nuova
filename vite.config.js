@@ -3,7 +3,11 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: './',   // percorsi relativi: necessario per GitHub Pages in sottocartella
+  // Il sito vive in una sottocartella: https://…github.io/casa-nuova/
+  // Deve essere un percorso assoluto, non './': serve anche al router come
+  // basename, altrimenti l'app "esce" dalla propria cartella e ogni immagine
+  // relativa (il logo) va a cercarsi nella radice del dominio.
+  base: '/casa-nuova/',
   plugins: [
     react(),
     VitePWA({

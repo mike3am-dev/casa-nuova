@@ -10,10 +10,10 @@ IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
 echo ""
 echo "  Casa Nuova è accesa 🏺"
 echo ""
-echo "  Sul Mac:     http://localhost:4173"
-[ -n "$IP" ] && echo "  Su iPhone:   http://$IP:4173   (stesso Wi-Fi di casa)"
+echo "  Sul Mac:     http://localhost:4173/casa-nuova/"
+[ -n "$IP" ] && echo "  Su iPhone:   http://$IP:4173/casa-nuova/   (stesso Wi-Fi di casa)"
 echo ""
 echo "  Chiudi questa finestra per spegnere."
 echo ""
-(sleep 1.5 && open "http://localhost:4173") &
+(sleep 1.5 && open "http://localhost:4173/casa-nuova/") &
 npx vite preview --port 4173 --host

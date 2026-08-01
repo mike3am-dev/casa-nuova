@@ -48,7 +48,7 @@ export default function Layout({ children }) {
     <div className="app">
       <nav className="side" aria-label="Sezioni">
         <NavLink to="/" className="wordmark">
-          <img src="./logo.png" alt="Casa Nuova" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Casa Nuova" />
           <span className="eyebrow">Palazzina E · dic 2027</span>
         </NavLink>
         <ul>

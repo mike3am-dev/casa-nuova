@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <section className="screen home">
       <div className="home-hero">
-        <img src="./logo.png" alt="" className="home-logo" />
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="home-logo" />
         <h1>La casa nuova</h1>
         <p className="home-claim">Palazzina E · piano terra sud-est, con giardino<br />Cologno Monzese</p>
         <div className="home-countdown">

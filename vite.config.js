@@ -8,7 +8,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['fonts/fraunces.woff2', 'icons/icon-180.png'],
+      // logo e favicon restavano fuori dal precache: erano le uniche immagini
+      // della schermata iniziale e senza rete si vedeva il riquadro rotto.
+      includeAssets: ['fonts/fraunces.woff2', 'icons/icon-180.png', 'logo.png', 'favicon.png'],
       manifest: {
         name: 'Casa Nuova',
         short_name: 'Casa Nuova',

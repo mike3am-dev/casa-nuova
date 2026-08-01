@@ -30,6 +30,13 @@
 ## Va bene così
 - Casa & Design su iPhone è chiaro e comprensibile.
 
+## Logo rotto nella schermata iniziale
+- [x] `logo.png` e `favicon.png` erano **fuori dal precache** del service worker
+      (c'erano 10 voci su 12). Il file era sano e online rispondeva 200: mancava
+      solo in cache, quindi senza rete o con rete incerta restava il riquadro
+      rotto. Ora sono precaricati entrambi.
+- Se ricapita **con rete buona**, non è questo: dimmelo e lo guardo daccapo.
+
 ---
 
 ## Nota sulla lentezza — da confermare sul telefono

@@ -12,8 +12,16 @@ export default function MeteoDrone({ data }) {
   useEffect(() => {
     let vivo = true
     setP(undefined)
-    previsione(data).then(x => { if (vivo) setP(x) })
-    return () => { vivo = false }
+    const guarda = () => previsione(data).then(x => { if (vivo) setP(x) })
+    guarda()
+
+    // Se l'app resta aperta su questa pagina (su iPhone è la norma) il
+    // componente non si rimonta e la previsione invecchia lì. Quando il
+    // telefono torna attivo la ricontrollo: entro l'ora risponde la cache,
+    // dopo va a riprendersela.
+    const alRisveglio = () => { if (!document.hidden) guarda() }
+    document.addEventListener('visibilitychange', alRisveglio)
+    return () => { vivo = false; document.removeEventListener('visibilitychange', alRisveglio) }
   }, [data])
 
   if (!data) return null

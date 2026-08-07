@@ -15,7 +15,7 @@
 
 ## Il progetto
 - [x] Aprendo una foto: **solo grande**, niente selezione ambienti.
-- [~] **Lentezza**: vedi nota sotto.
+- [x] **Lentezza risolta** — confermato da Mike sul telefono il 7 agosto 2026.
 
 ## Checklist
 - [x] **Swipe a sinistra = elimina**, **swipe a destra = fatta/da fare**.
@@ -25,7 +25,7 @@
 
 ## Spese e documenti
 - [x] **Niente modifiche da iPhone** (compresa la pillola dello stato, che si toccava per sbaglio).
-- [~] **Lentezza**: vedi nota sotto.
+- [x] **Lentezza risolta** — confermato da Mike sul telefono il 7 agosto 2026.
 
 ## Va bene così
 - Casa & Design su iPhone è chiaro e comprensibile.
@@ -54,7 +54,7 @@ precache restano comunque utili offline, ma non erano la causa.
 
 ---
 
-## Nota sulla lentezza — da confermare sul telefono
+## Nota sulla lentezza — RISOLTA (confermato il 7 agosto 2026)
 
 Sul Mac **non si riproduce**: dati in 150–370 ms, DOM minuscolo (Spese: 328 nodi,
 11 righe), immagini a posto. Quindi la causa è nel motore di iOS, non nei dati.
@@ -69,11 +69,13 @@ Rimossi tre costrutti che su WebKit costano molto e su desktop no:
 3. `euro()` costruiva un `Intl.NumberFormat` nuovo a ogni importo; in "Spese"
    erano decine per render. Ora uno solo, riusato.
 
-**Non è dimostrato che questi tre risolvano**: su questa macchina manca Xcode/il
-simulatore iOS, quindi WebKit vero non è stato testato. Se dopo l'aggiornamento
-"Il progetto" e "Spese" sono ancora lente, il prossimo passo è misurare sul
-telefono (pagina di misura temporanea, poi rimossa) invece di tirare a indovinare.
+Le tre correzioni sono bastate: Mike ha confermato sul telefono il 7 agosto 2026.
+Da notare per il futuro: **sul Mac il problema non si vedeva affatto**, perché
+Blink/V8 gestisce bene sia la fusione a schermo intero sia gli `Intl` ripetuti.
+Se ricapita un "lento solo su iPhone", guardare per prime le stesse tre famiglie:
+livelli fissi che si fondono o si sfocano, e oggetti costosi ricostruiti dentro
+un render.
 
 Resta comunque vero che "Il progetto" scarica ~1 MB di miniature (12 × ~90 KB a
-600px, mostrate a ~340px): se la lentezza è lì, si risolve rigenerando le
-miniature più piccole.
+600px, mostrate a ~340px): non era la causa, ma se un giorno servisse alleggerire,
+si rigenerano più piccole.

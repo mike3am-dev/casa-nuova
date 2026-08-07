@@ -4,6 +4,7 @@ import { dataIt, dataBreve, quando, giornoSettimana, giorniAllaConsegna } from '
 import { signedUrls } from '../lib/media'
 import PhotoGrid from '../components/PhotoGrid'
 import Lightbox from '../components/Lightbox'
+import MeteoDrone from '../components/MeteoDrone'
 
 const ORDINE = ['A', 'B', 'C', 'S', 'T', 'DE']
 const LAB = c => (c === 'DE' ? 'D/E' : c)   // D/E: unica struttura (contiene la Palazzina E)
@@ -229,17 +230,16 @@ export default function Cantiere() {
                     <small>ultimo sopralluogo</small>
                     <em>{ultima ? quando(ultima.date) : ''}</em>
                   </div>
-                  <div className={prossimoSop ? 'sit-prossimo' : ''}>
-                    <b>{prossimoSop ? dataBreve(prossimoSop) : '—'}</b>
-                    <small>prossimo sopralluogo</small>
-                    <em>{prossimoSop ? `${giornoSettimana(prossimoSop)} · ${quando(prossimoSop)}` : 'da fissare'}</em>
-                  </div>
                   <div>
                     <b>{giorniConsegna}</b>
                     <small>giorni alla consegna</small>
                     <em>{dataIt(settings?.delivery_date || '2027-12-30')}</em>
                   </div>
                 </div>
+
+                {prossimoSop
+                  ? <MeteoDrone data={prossimoSop} />
+                  : <p className="md-dafissare">Prossimo sopralluogo da fissare.</p>}
 
                 {msE?.e && (
                   <div className="sit-prossimo-passo">

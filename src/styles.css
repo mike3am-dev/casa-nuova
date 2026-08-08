@@ -259,44 +259,50 @@ main { flex: 1; min-width: 0; padding: 2.4rem clamp(1.2rem, 4vw, 3.5rem) 5rem; m
 .sit-dati em { margin-top: .1rem; font-size: .76rem; font-style: normal; color: var(--inchiostro-2) }
 .sit-dati .sit-prossimo b, .sit-dati .sit-prossimo em { color: var(--terra) }
 
-/* ---------- meteo e drone del prossimo sopralluogo ---------- */
+/* ---------- meteo e drone del prossimo sopralluogo (card della home) ---------- */
 .meteo-drone {
-  margin-top: 1.4rem; padding: 1rem 1.1rem; border-radius: 14px;
-  background: var(--velo); border: 1px solid var(--travertino);
+  grid-column: 1 / -1; display: block; width: 100%; text-align: left; cursor: pointer;
+  padding: 1.3rem 1.4rem; border-radius: 16px;
+  background: var(--calce); border: 1px solid var(--travertino); box-shadow: var(--ombra);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
-.md-testa { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem }
-.md-testa .eyebrow { flex: 1 0 100% }
-.md-testa b { font-family: 'Fraunces', Georgia, serif; font-size: 1.15rem; font-weight: 440 }
-.md-testa small { color: var(--inchiostro-2); font-size: .8rem }
+.meteo-drone:hover { transform: translateY(-3px); box-shadow: 0 16px 34px -14px rgba(51,38,26,.4); border-color: var(--travertino-scuro) }
+
+.md-testa { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .55rem }
+.md-testa .eyebrow { flex: 1 0 100%; margin-bottom: .35rem }
+.md-testa b { font-family: 'Fraunces', Georgia, serif; font-size: 1.32rem; font-weight: 440; line-height: 1.2 }
+.md-quando { font-size: .78rem; color: var(--bronzo); white-space: nowrap }
+@media (max-width: 400px) { .md-testa b { font-size: 1.18rem } }
 
 .md-riga {
-  display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;
-  margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--travertino);
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  margin-top: 1rem; padding-top: .95rem; border-top: 1px solid var(--travertino);
 }
-.md-icona { font-size: 1.9rem; line-height: 1 }
-.md-riga > div { display: flex; flex-direction: column; min-width: 0 }
-.md-riga b {
-  font-family: 'Fraunces', Georgia, serif; font-size: 1.35rem; font-weight: 440;
-  line-height: 1.1; font-variant-numeric: tabular-nums;
+.md-dato { min-width: 0; padding-left: 1rem; border-left: 1px solid var(--travertino) }
+.md-dato:first-child { padding-left: 0; border-left: 0 }
+.md-dato b {
+  display: flex; align-items: baseline; gap: .35rem;
+  font-family: 'Fraunces', Georgia, serif; font-size: 1.6rem; font-weight: 440;
+  line-height: 1; color: var(--terra); font-variant-numeric: tabular-nums;
 }
-.md-riga b i { font-style: normal; font-size: .72rem; font-family: inherit; color: var(--inchiostro-2) }
-.md-riga small { font-size: .72rem; color: var(--inchiostro-2); margin-top: .15rem }
-.md-cielo { flex: 1 1 auto }
+.md-dato b i { font-style: normal; font-size: .7rem; font-family: inherit; color: var(--inchiostro-2) }
+.md-dato small {
+  display: block; margin-top: .4rem; font-size: .72rem; color: var(--inchiostro-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.md-icona { font-size: 1.1rem; line-height: 1 }
 
 .md-drone {
   display: flex; align-items: flex-start; gap: .55rem;
-  margin: .9rem 0 0; font-size: .9rem; line-height: 1.45;
+  margin: .95rem 0 0; font-size: .86rem; line-height: 1.45; color: var(--inchiostro);
 }
-.md-pallino { flex: none; width: 9px; height: 9px; border-radius: 50%; margin-top: .38rem }
-.md-drone.ok    { color: var(--inchiostro) }
+.md-pallino { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: .35rem }
 .md-drone.ok    .md-pallino { background: var(--oliva) }
-.md-drone.forse { color: var(--inchiostro) }
 .md-drone.forse .md-pallino { background: var(--bronzo) }
 .md-drone.no    { color: var(--inchiostro-2) }
 .md-drone.no    .md-pallino { background: #B4553F }
 
-.md-attesa { margin: .7rem 0 0; font-size: .85rem; color: var(--inchiostro-2); line-height: 1.5 }
-.md-fonte { display: block; margin-top: .6rem; font-size: .68rem; color: var(--travertino-scuro) }
+.md-attesa { margin: .9rem 0 0; font-size: .82rem; color: var(--inchiostro-2) }
 .md-dafissare { margin-top: 1.4rem; font-size: .88rem; color: var(--inchiostro-2) }
 
 .sit-prossimo-passo { margin-top: 1.4rem; padding-left: 1rem; border-left: 3px solid var(--travertino-scuro) }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { dataIt, dataBreve, quando, giornoSettimana, giorniAllaConsegna, euro } from '../lib/format'
+import { dataIt, dataBreve, quando, giorniAllaConsegna, euro } from '../lib/format'
 import { signedUrls } from '../lib/media'
+import MeteoDrone from '../components/MeteoDrone'
 
 export default function Home() {
   const [d, setD] = useState(null)
@@ -69,12 +70,14 @@ export default function Home() {
           </div>
         </button>
 
-        <button className="home-card" onClick={() => vai('/')}>
-          <span className="eyebrow">Prossimo sopralluogo</span>
-          <b className="grande-num">{s?.next_visit ? dataBreve(s.next_visit) : '—'}</b>
-          <small>{s?.next_visit ? `${giornoSettimana(s.next_visit)} · ${quando(s.next_visit)}` : 'da fissare'}</small>
-          {ultima && <em>ultimo: {dataBreve(ultima.date)}, {quando(ultima.date)}</em>}
-        </button>
+        {s?.next_visit
+          ? <MeteoDrone data={s.next_visit} onClick={() => vai('/')} />
+          : <button className="home-card" onClick={() => vai('/')}>
+              <span className="eyebrow">Prossimo sopralluogo</span>
+              <b className="grande-num">—</b>
+              <small>da fissare</small>
+              {ultima && <em>ultimo: {dataBreve(ultima.date)}, {quando(ultima.date)}</em>}
+            </button>}
 
         <button className="home-card" onClick={() => vai('/spese')}>
           <span className="eyebrow">Pagamenti</span>

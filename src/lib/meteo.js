@@ -27,17 +27,17 @@ export const cielo = code => CIELO[code] ?? ['—', '🌡️']
 // Un multirotore da consumo regge fino a ~38 km/h di raffica, ma sopra i 28
 // le foto vengono mosse e la batteria si svuota a lottare contro l'aria.
 export function giudizioDrone({ code, raffiche, vento }) {
-  if (code >= 95) return { esito: 'no', frase: 'Temporale in arrivo: il drone resta a casa.' }
+  if (code >= 95) return { esito: 'no', frase: 'Temporale: il drone resta a casa.' }
   if (code >= 71 && code <= 77) return { esito: 'no', frase: 'Neve: niente volo.' }
-  if (code >= 61 || code === 82) return { esito: 'no', frase: 'Pioggia: niente volo, e comunque non si vedrebbe nulla.' }
-  if (code === 45 || code === 48) return { esito: 'no', frase: 'Nebbia: il cantiere non si vedrebbe.' }
-  if (raffiche >= 38) return { esito: 'no', frase: `Raffiche a ${Math.round(raffiche)} km/h: troppo vento per alzarsi.` }
-  if (raffiche >= 28) return { esito: 'forse', frase: `Raffiche fino a ${Math.round(raffiche)} km/h: si vola, ma tieniti basso e scatta in fretta.` }
-  if (code >= 51) return { esito: 'forse', frase: 'Pioviggine: fattibile solo se smette, meglio avere un piano B.' }
+  if (code >= 61 || code === 82) return { esito: 'no', frase: 'Pioggia: niente volo.' }
+  if (code === 45 || code === 48) return { esito: 'no', frase: 'Nebbia: non si vedrebbe nulla.' }
+  if (raffiche >= 38) return { esito: 'no', frase: `Raffiche a ${Math.round(raffiche)}: troppo vento.` }
+  if (raffiche >= 28) return { esito: 'forse', frase: `Raffiche a ${Math.round(raffiche)}: vola basso e sbriga.` }
+  if (code >= 51) return { esito: 'forse', frase: 'Pioviggine: serve un piano B.' }
   // si vola: resta da dire com'è la luce, che è quello che fa la differenza sulle foto
-  if (code === 3) return { esito: 'sì', frase: 'Si vola senza problemi, ma col cielo coperto le foto vengono piatte.' }
-  if (vento <= 12) return { esito: 'sì', frase: 'Aria ferma e cielo pulito: giornata giusta per il drone.' }
-  return { esito: 'sì', frase: 'Vento tranquillo e buona luce: via libera al volo.' }
+  if (code === 3) return { esito: 'sì', frase: 'Si vola, ma col coperto le foto vengono piatte.' }
+  if (vento <= 12) return { esito: 'sì', frase: 'Aria ferma e cielo pulito: giornata giusta.' }
+  return { esito: 'sì', frase: 'Vento tranquillo e buona luce: via libera.' }
 }
 
 /**

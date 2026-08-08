@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { dataIt, dataBreve, quando, giornoSettimana, giorniAllaConsegna } from '../lib/format'
+import { dataIt, dataBreve, quando, giorniAllaConsegna } from '../lib/format'
 import { signedUrls } from '../lib/media'
 import PhotoGrid from '../components/PhotoGrid'
 import Lightbox from '../components/Lightbox'
-import MeteoDrone from '../components/MeteoDrone'
 
 const ORDINE = ['A', 'B', 'C', 'S', 'T', 'DE']
 const LAB = c => (c === 'DE' ? 'D/E' : c)   // D/E: unica struttura (contiene la Palazzina E)
@@ -195,7 +194,6 @@ export default function Cantiere() {
         const ultima = visite.at(-1)
         const statoDE = ultima ? (stati[ultima.id] ?? []).find(s => s.building_code === 'DE') : null
         const msE = ultima?.meta?.milestone
-        const prossimoSop = settings?.next_visit
         const giorniConsegna = giorniAllaConsegna(settings?.delivery_date)
         return (
           <div className="card situazione">
@@ -236,10 +234,6 @@ export default function Cantiere() {
                     <em>{dataIt(settings?.delivery_date || '2027-12-30')}</em>
                   </div>
                 </div>
-
-                {prossimoSop
-                  ? <MeteoDrone data={prossimoSop} />
-                  : <p className="md-dafissare">Prossimo sopralluogo da fissare.</p>}
 
                 {msE?.e && (
                   <div className="sit-prossimo-passo">

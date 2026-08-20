@@ -957,9 +957,18 @@ button.fase-tag:hover { background: var(--velo) }
 .lightbox .chiudi { position: fixed; top: max(1.2rem, env(safe-area-inset-top)); right: 1.4rem; color: #EFE3CE; font-size: .9rem; letter-spacing: .12em; text-transform: uppercase; padding: .5rem; z-index: 51 }
 .lightbox .freccia {
   position: fixed; top: 50%; transform: translateY(-50%); color: #EFE3CE;
-  font-size: 2rem; padding: 1rem .8rem; z-index: 51; font-family: Georgia, serif;
+  font-size: 1.9rem; line-height: 1; z-index: 51; font-family: Georgia, serif;
+  /* fondo tondo: sopra una foto chiara una freccia nuda non si vede */
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(24,16,10,.55); padding: 0 0 .18em 0;
+  transition: background .16s, transform .16s;
 }
-.lightbox .freccia.sx { left: .2rem } .lightbox .freccia.dx { right: .2rem }
+.lightbox .freccia:hover { background: rgba(24,16,10,.8) }
+.lightbox .freccia.sx { left: .7rem } .lightbox .freccia.dx { right: .7rem }
+@media (max-width: 760px) {
+  .lightbox .freccia { width: 42px; height: 42px; font-size: 1.7rem }
+  .lightbox .freccia.sx { left: .4rem } .lightbox .freccia.dx { right: .4rem }
+}
 .lightbox .elimina { position: fixed; bottom: max(1.2rem, env(safe-area-inset-bottom)); right: 1.4rem; color: #E0937F; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; padding: .5rem; z-index: 51 }
 
 /* ---------- login ---------- */

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { dataIt, dataBreve, quando, giorniAllaConsegna } from '../lib/format'
 import { signedUrls } from '../lib/media'
@@ -20,7 +20,7 @@ export default function Cantiere() {
   const [nuovo, setNuovo] = useState(false)
   const [editPiani, setEditPiani] = useState(false)
   const [editReport, setEditReport] = useState(false)
-  const [grande, setGrande] = useState(null)   // { visitId } foto della timeline aperte a schermo pieno
+  const [grande, setGrande] = useState(null)   // id della foto aperta a schermo pieno
   const stripRef = useRef(null)
 
   async function carica(mantieniSel = false) {
@@ -104,6 +104,15 @@ export default function Cantiere() {
     setEditReport(false); carica(true)
   }
 
+  // Tutte le foto del cantiere in un elenco solo, dal più recente al più vecchio:
+  // è quello che si sfoglia con le frecce, senza dover chiudere e riaprire.
+  // useMemo indispensabile: un array nuovo a ogni render rimanderebbe il visore
+  // sempre alla foto di partenza.
+  const tutteFoto = useMemo(() => {
+    if (!visite) return []
+    return [...visite].reverse().flatMap(vv => foto[vv.id] ?? [])
+  }, [visite, foto])
+
   if (visite === null) return <div className="caricamento">carico il cantiere…</div>
 
   const v = visite.find(x => x.id === sel)
@@ -169,7 +178,7 @@ export default function Cantiere() {
                       <div className={`tl-card ${vv.id === sel ? 'on' : ''}`}>
                         {/* la foto: seleziona la tappa E la apre subito grande */}
                         <button className="tl-thumb" aria-label={`Foto del ${dataBreve(vv.date)} a schermo pieno`}
-                          onClick={() => { setSel(vv.id); if (haFoto) setGrande(vv.id) }}>
+                          onClick={() => { setSel(vv.id); if (haFoto) setGrande(foto[vv.id][0].id) }}>
                           {vv.drone && <span className="tl-drone">drone</span>}
                           {thumb ? <img src={thumb} alt="" loading="lazy" decoding="async" /> : <span className="t-nofoto">nessuna foto</span>}
                         </button>
@@ -288,7 +297,8 @@ export default function Cantiere() {
             <>
               <div className="fase">
                 <div className="fase-foto">
-                  <PhotoGrid photos={foto[v.id] ?? []} meta={{ visit_id: v.id }} onChange={() => carica(true)} canAdd={false} large />
+                  <PhotoGrid photos={foto[v.id] ?? []} meta={{ visit_id: v.id }} onChange={() => carica(true)} canAdd={false} large
+                    elencoCompleto={tutteFoto} />
                 </div>
                 {statoDesc.length > 0 && (
                   <div className="fase-stato">
@@ -369,9 +379,12 @@ export default function Cantiere() {
         </div>
       )}
 
-      {grande && (foto[grande] ?? []).length > 0 && (
-        <Lightbox photos={foto[grande]} index={0} onClose={() => setGrande(null)} />
-      )}
+      {grande != null && (() => {
+        const i = tutteFoto.findIndex(f => f.id === grande)
+        return i < 0 ? null : (
+          <Lightbox photos={tutteFoto} index={i} onClose={() => setGrande(null)} />
+        )
+      })()}
     </section>
   )
 }

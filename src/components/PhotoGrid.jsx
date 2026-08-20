@@ -4,9 +4,11 @@ import Lightbox from './Lightbox'
 
 // Galleria con miniature firmate, lazy loading, upload e lightbox.
 // meta: { visit_id } | { capitolato_item_id } | { design_kind }
-export default function PhotoGrid({ photos, meta, onChange, addLabel = 'Aggiungi foto', canAdd = true, large = false }) {
+// elencoCompleto: se passato, il visore sfoglia quello invece delle sole foto
+// di questa griglia — così dal cantiere si scorrono tutti i sopralluoghi.
+export default function PhotoGrid({ photos, meta, onChange, addLabel = 'Aggiungi foto', canAdd = true, large = false, elencoCompleto }) {
   const [thumbs, setThumbs] = useState({})
-  const [aperta, setAperta] = useState(null)
+  const [aperta, setAperta] = useState(null)   // id della foto aperta, non l'indice
   const [caricando, setCaricando] = useState(0)
 
   // in modalità "large" mostra la versione ad alta risoluzione (storage_path), non la miniatura
@@ -30,8 +32,8 @@ export default function PhotoGrid({ photos, meta, onChange, addLabel = 'Aggiungi
   return (
     <>
       <div className="galleria">
-        {photos.map((p, idx) => (
-          <button key={p.id} className="ph" onClick={() => setAperta(idx)} aria-label={p.caption || 'Apri foto'}>
+        {photos.map(p => (
+          <button key={p.id} className="ph" onClick={() => setAperta(p.id)} aria-label={p.caption || 'Apri foto'}>
             {thumbs[p[key]] && <img src={thumbs[p[key]]} alt={p.caption || ''} loading="lazy" />}
             {p.caption && <span className="cap">{p.caption}</span>}
           </button>
@@ -44,10 +46,14 @@ export default function PhotoGrid({ photos, meta, onChange, addLabel = 'Aggiungi
           </label>
         )}
       </div>
-      {aperta != null && (
-        <Lightbox photos={photos} index={aperta} onClose={() => setAperta(null)}
-          onDeleted={() => onChange?.()} />
-      )}
+      {aperta != null && (() => {
+        const lista = elencoCompleto?.length ? elencoCompleto : photos
+        const i = lista.findIndex(x => x.id === aperta)
+        return i < 0 ? null : (
+          <Lightbox photos={lista} index={i} onClose={() => setAperta(null)}
+            onDeleted={() => onChange?.()} />
+        )
+      })()}
     </>
   )
 }

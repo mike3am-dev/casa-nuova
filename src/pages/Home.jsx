@@ -32,9 +32,9 @@ export default function Home() {
       const domande = voci.filter(x => !x.done && x.code === 'domanda').length
 
       if (ultima) {
-        const { data: ph } = await supabase.from('photos').select('image_path')
+        const { data: ph } = await supabase.from('photos').select('storage_path')
           .eq('visit_id', ultima.id).limit(1)
-        if (ph?.[0]) signedUrls([ph[0].image_path]).then(u => setCover(u[ph[0].image_path]))
+        if (ph?.[0]) signedUrls([ph[0].storage_path]).then(u => setCover(u[ph[0].storage_path]))
       }
       setD({ s: s.data, ultima, statoDE, versato, totale, prossimaSpesa, urgenti, domande })
     })()

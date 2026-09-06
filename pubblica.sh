@@ -23,5 +23,5 @@ git push origin main
 
 echo ""
 echo "  ✓ Pubblicato. Tra un minuto è online:"
-echo "    https://c4gv4kf4d7-dev.github.io/casa-nuova/"
+echo "    https://mike3am-dev.github.io/casa-nuova/"
 echo ""
